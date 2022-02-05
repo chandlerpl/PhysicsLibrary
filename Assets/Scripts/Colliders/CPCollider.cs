@@ -58,7 +58,7 @@ public abstract class CPCollider : MonoBehaviour
         return distance < r * r;
     }
 
-    protected static bool RayTriangleIntersection(CPRay ray, Vector3 pos0, Vector3 pos1, Vector3 pos2, out float t, bool doubleSided = false)
+    public static bool RayTriangleIntersection(CPRay ray, Vector3 pos0, Vector3 pos1, Vector3 pos2, out float t, bool doubleSided = false)
     {
         t = float.MaxValue;
         Vector3 v0v1 = pos1 - pos0;
