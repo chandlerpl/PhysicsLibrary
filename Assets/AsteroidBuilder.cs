@@ -34,7 +34,8 @@ public class AsteroidBuilder : MonoBehaviour
         
         foreach (SubModelData mData in mDatas.SubModels)
         {
-            mData.Vertices = HCFilter(mData.Vertices, mData.Triangles);
+            //mData.Vertices = HCFilter(mData.Vertices, mData.Triangles);
+            mData.Vertices = LaplacianFilter(mData.Vertices, mData.Triangles, 3);
             //mData.Vertices = RelaxVertices(mData.Vertices, mData.Triangles);
 
             if (!sides.TryGetValue(mData.Direction, out GameObject side) || side == null)
@@ -76,50 +77,20 @@ public class AsteroidBuilder : MonoBehaviour
         }
     }
 
-    public Vector3[] RelaxVertices(Vector3[] vertices, int[] triangles)
+    public Vector3[] RelaxVertices(Vector3[] origin, int[] triangles)
     {
-        float offset = 0;
-        for(int i = 0; i < triangles.Length; i += 6)
+        Vector3[] vertices = new Vector3[origin.Length];
+        Dictionary<int, VertexConnection> network = VertexConnection.BuildNetwork(triangles);
+
+        for (int i = 0, n = origin.Length; i < n; i++)
         {
-            Vector3 pos0 = vertices[triangles[i]];
-            Vector3 pos1 = vertices[triangles[i + 1]];
-            Vector3 pos2 = vertices[triangles[i + 2]];
-
-            offset += (pos2 - pos0).magnitude;
-            offset += (pos1 - pos2).magnitude;
-
-            Vector3 pos3 = vertices[triangles[i + 3]];
-            Vector3 pos4 = vertices[triangles[i + 4]];
-            Vector3 pos5 = vertices[triangles[i + 5]];
-
-            offset += (pos4 - pos3).magnitude;
-            offset += (pos5 - pos4).magnitude;
-        }
-        offset /= triangles.Length;
-
-        for (int i = 0; i < triangles.Length; i += 6)
-        {
-            Vector3 pos0 = vertices[triangles[i]];
-            Vector3 pos1 = vertices[triangles[i + 1]];
-            Vector3 pos2 = vertices[triangles[i + 2]];
-            Vector3 pos4 = vertices[triangles[i + 4]];
-
-            Vector3 pos01 = (pos0 + pos1) / 2;
-
-            vertices[triangles[i]] -= ((pos1 - pos0).normalized * offset / 2) * 0.1f;
-            vertices[triangles[i + 1]] += ((pos1 - pos0).normalized * offset / 2) * 0.1f;
-
-            Vector3 pos02 = (pos0 + pos2) / 2;
-            vertices[triangles[i]] -= ((pos2 - pos0).normalized * offset / 2) * 0.1f;
-            vertices[triangles[i + 2]] += ((pos2 - pos0).normalized * offset / 2) * 0.1f;
-
-            Vector3 pos24 = (pos2 + pos4) / 2;
-            vertices[triangles[i]] -= ((pos4 - pos2).normalized * offset / 2) * 0.1f;
-            vertices[triangles[i + 2]] += ((pos4 - pos2).normalized * offset / 2) * 0.1f;
-
-            Vector3 pos14 = (pos1 + pos4) / 2;
-            vertices[triangles[i]] -= ((pos4 - pos1).normalized * offset / 2) * 0.1f;
-            vertices[triangles[i + 2]] += ((pos4 - pos1).normalized * offset / 2) * 0.1f;
+            var connection = network[i].Connection;
+            var v = Vector3.zero;
+            foreach (int adj in connection)
+            {
+                v += origin[adj];
+            }
+            vertices[i] = v / connection.Count;
         }
 
         return vertices;
