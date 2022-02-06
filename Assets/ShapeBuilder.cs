@@ -263,19 +263,28 @@ public class ShapeBuilder
                 {
                     points2.Add(pos0);
                 }
-                triangles.Add(points2.IndexOf(pos0));
+                triangles.Add(points2.FindIndex(v =>
+                {
+                    return pos0.ApproxEquals(v, 0.001f);
+                }));
 
                 if (!points2.Contains(pos1, comparer))
                 {
                     points2.Add(pos1);
                 }
-                triangles.Add(points2.IndexOf(pos1));
+                triangles.Add(points2.FindIndex(v =>
+                {
+                    return pos1.ApproxEquals(v, 0.001f);
+                }));
 
                 if (!points2.Contains(pos2, comparer))
                 {
                     points2.Add(pos2);
                 }
-                triangles.Add(points2.IndexOf(pos2));
+                triangles.Add(points2.FindIndex(v =>
+                {
+                    return pos2.ApproxEquals(v, 0.001f);
+                }));
             }
         }
 
@@ -283,14 +292,32 @@ public class ShapeBuilder
         newData.SubModels[0].Triangles = triangles.ToArray();
         return newData;
     }
+}
 
+public static class Vector3Utils
+{
+    public static bool ApproxEquals(this Vector3 v, Vector3 other, float offset = float.Epsilon)
+    {
+        float x = v.x - other.x;
+        float y = v.y - other.y;
+        float z = v.z - other.z;
+
+        if (x > offset || x < -offset)
+            return false;
+        if (z > offset || z < -offset)
+            return false;
+        if (y > offset || y < -offset)
+            return false;
+
+        return true;
+    }
 }
 
 public class VectorComparer : IEqualityComparer<Vector3>
 {
     public bool Equals(Vector3 test, Vector3 other)
     {
-        return test.x.ApproxEqual(other.x) && test.y.ApproxEqual(other.y) && test.z.ApproxEqual(other.z);
+            return test.ApproxEquals(other, 0.001f);
     }
 
     public int GetHashCode(Vector3 obj)
