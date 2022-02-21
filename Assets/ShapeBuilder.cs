@@ -24,7 +24,7 @@ public class ShapeBuilder
 
     private readonly static Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
-    public enum Shape {  Plane, Cube, Sphere, Random }
+    public enum Shape {  Plane, Cube, Sphere, Sphere2, Random }
 
     public Shape shape = Shape.Sphere;
     public int resolution = 2;
@@ -39,6 +39,9 @@ public class ShapeBuilder
         {
             case Shape.Sphere:
                 BuildSphere(ref data);
+                break;
+            case Shape.Sphere2:
+                BuildSphere2(ref data);
                 break;
             case Shape.Cube:
                 BuildCube(ref data);
@@ -132,6 +135,32 @@ public class ShapeBuilder
         }
     }
 
+    private void BuildSphere2(ref ModelData data)
+    {
+        BuildCube(ref data);
+
+        for (int side = 0; side < 6; ++side)
+        {
+            for (int i = 0; i < data.SubModels[side].Vertices.Length; ++i)
+            {
+                Vector3 v = data.SubModels[side].Vertices[i].normalized * 2f / resolution;
+                float x2 = v.x * v.x;
+                float y2 = v.y * v.y;
+                float z2 = v.z * v.z;
+                Vector3 s = new Vector3
+                {
+                    x = v.x * Mathf.Sqrt(1f - y2 / 2f - z2 / 2f + y2 * z2 / 3f),
+                    y = v.y * Mathf.Sqrt(1f - x2 / 2f - z2 / 2f + x2 * z2 / 3f),
+                    z = v.z * Mathf.Sqrt(1f - x2 / 2f - y2 / 2f + x2 * y2 / 3f)
+                };
+                s = s.normalized / 2;
+
+                data.SubModels[side].Normals[i] = s;
+                data.SubModels[side].Vertices[i] = s;
+            }
+        }
+    }
+
     private void BuildRandom(ref ModelData data)
     {
         data = new ModelData();
@@ -205,7 +234,7 @@ public class ShapeBuilder
     private ModelData Remesh(ModelData data)
     {
         ModelData sphere = null;
-        BuildSphere(ref sphere);
+        BuildSphere2(ref sphere);
         sphere = MergeModel(sphere);
 
         foreach(SubModelData subData in sphere.SubModels)
