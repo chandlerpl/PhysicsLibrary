@@ -15,22 +15,22 @@ MonoBehaviour:
   noiseDirection: 0
   settings:
   - type: 2
-    enabled: 0
+    enabled: 1
     specificSeed: 0
     seed: 1693049464
     octaves: 3
     scale: 0.005
     persistance: 0.5
     strength: 0.1
-    textureResolution: 512
+    textureResolution: 1024
     MinMax: {x: -1, y: 1}
   - type: 0
     enabled: 0
     specificSeed: 0
     seed: 1693049464
-    octaves: 2
-    scale: 0.005
+    octaves: 4
+    scale: 0.01
     persistance: 0.5
     strength: 0.1
-    textureResolution: 275
+    textureResolution: 256
     MinMax: {x: -1, y: 1}

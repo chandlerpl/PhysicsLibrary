@@ -64,6 +64,8 @@ public class AsteroidBuilder : MonoBehaviour
             renderer.sharedMaterial = material;
 
             SubModelData mData2 = ApplyNoise(mData);
+            mData.Vertices = LaplacianFilter(mData.Vertices, mData.Triangles, 1);
+            mData2.Normals = null;
             //SubModelData mData2 = mData;
             m.triangles = null;
             m.normals = null;
@@ -193,7 +195,7 @@ public class AsteroidBuilder : MonoBehaviour
 
         for (int i = 0; i < mData.Vertices.Length; ++i)
         {
-            mData.Vertices[i] += mData.Vertices[i].normalized * noise[i];
+            mData.Vertices[i] += mData.Normals[i] * noise[i];
         }
 
         return mData;
